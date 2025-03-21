@@ -17,6 +17,7 @@ SOURCES = midi-randomizer.c
 all: $(BUNDLE)/midi-randomizer.so
 
 $(BUNDLE)/midi-randomizer.so: $(SOURCES)
+	mkdir -p $(BUNDLE)
 	$(CC) $(CFLAGS) $(SOURCES) $(LDFLAGS) -o $@
 
 install: all
