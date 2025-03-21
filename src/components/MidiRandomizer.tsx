@@ -1,10 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
-import { Slider } from '@/components/ui/slider';
-import Knob from './Knob';
-import MidiVisualizer from './MidiVisualizer';
 import { cn } from '@/lib/utils';
-import { ChevronDown, Power, RefreshCw, Save } from 'lucide-react';
+import MidiVisualizer from './MidiVisualizer';
+import PluginHeader from './midi-randomizer/PluginHeader';
+import ParameterControls from './midi-randomizer/ParameterControls';
+import PluginFooter from './midi-randomizer/PluginFooter';
 
 interface MidiRandomizerProps {
   className?: string;
@@ -41,6 +41,12 @@ const MidiRandomizer: React.FC<MidiRandomizerProps> = ({ className }) => {
     setRandomizeAmount(preset.randomize);
     setPresetOpen(false);
   };
+
+  const handleReset = () => {
+    setVelocity(20);
+    setTiming(15);
+    setRandomizeAmount(50);
+  };
   
   return (
     <div className={cn(
@@ -49,55 +55,16 @@ const MidiRandomizer: React.FC<MidiRandomizerProps> = ({ className }) => {
       className
     )}>
       {/* Plugin Header */}
-      <div className="bg-gradient-to-r from-gray-900 to-gray-800 px-6 py-4 flex justify-between items-center border-b border-gray-700">
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => setIsActive(!isActive)}
-            className={cn(
-              "rounded-full p-2 transition-colors duration-300",
-              isActive ? "bg-plugin-accent text-white" : "bg-gray-800 text-gray-400"
-            )}
-          >
-            <Power size={18} />
-          </button>
-          
-          <div>
-            <h1 className="text-xl font-medium text-white tracking-tight">MIDI Magic Randomizer</h1>
-            <p className="text-xs text-gray-400 mt-0.5">v1.0</p>
-          </div>
-        </div>
-        
-        <div className="relative">
-          <button 
-            onClick={() => setPresetOpen(!presetOpen)}
-            className="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 px-3 py-1.5 rounded text-sm transition-colors duration-200"
-          >
-            Presets
-            <ChevronDown size={14} className={cn(
-              "transition-transform duration-200",
-              presetOpen ? "rotate-180" : ""
-            )} />
-          </button>
-          
-          {presetOpen && (
-            <div className="absolute right-0 top-full mt-1 bg-gray-800 border border-gray-700 rounded-md shadow-xl z-10 w-48 py-1 animate-slide-up">
-              {presets.map((preset) => (
-                <button
-                  key={preset.name}
-                  onClick={() => applyPreset(preset)}
-                  className="w-full text-left px-4 py-2 hover:bg-gray-700 text-sm transition-colors duration-150"
-                >
-                  {preset.name}
-                </button>
-              ))}
-              <div className="border-t border-gray-700 my-1" />
-              <button className="w-full text-left px-4 py-2 hover:bg-gray-700 text-sm text-plugin-accent transition-colors duration-150">
-                Save Current Settings
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
+      <PluginHeader 
+        title="MIDI Magic Randomizer"
+        version="1.0"
+        isActive={isActive}
+        setIsActive={setIsActive}
+        presetOpen={presetOpen}
+        setPresetOpen={setPresetOpen}
+        presets={presets}
+        applyPreset={applyPreset}
+      />
       
       {/* Main Interface */}
       <div className="p-6 bg-gradient-to-b from-gray-900 to-gray-800">
@@ -110,102 +77,17 @@ const MidiRandomizer: React.FC<MidiRandomizerProps> = ({ className }) => {
         />
         
         {/* Controls */}
-        <div className="mt-8 grid grid-cols-3 gap-6">
-          <div className="flex flex-col items-center">
-            <Knob
-              label="VELOCITY"
-              value={velocity}
-              min={0}
-              max={100}
-              step={1}
-              onChange={setVelocity}
-              unit="%"
-              color="bg-blue-500"
-            />
-            <div className="mt-4 w-full px-2">
-              <Slider
-                value={[velocity]}
-                min={0}
-                max={100}
-                step={1}
-                onValueChange={(value) => setVelocity(value[0])}
-                className="w-full"
-              />
-            </div>
-          </div>
-          
-          <div className="flex flex-col items-center">
-            <Knob
-              label="TIMING"
-              value={timing}
-              min={0}
-              max={100}
-              step={1}
-              onChange={setTiming}
-              unit="%"
-              color="bg-green-500"
-            />
-            <div className="mt-4 w-full px-2">
-              <Slider
-                value={[timing]}
-                min={0}
-                max={100}
-                step={1}
-                onValueChange={(value) => setTiming(value[0])}
-                className="w-full"
-              />
-            </div>
-          </div>
-          
-          <div className="flex flex-col items-center">
-            <Knob
-              label="AMOUNT"
-              value={randomizeAmount}
-              min={0}
-              max={100}
-              step={1}
-              onChange={setRandomizeAmount}
-              unit="%"
-              color="bg-purple-500"
-            />
-            <div className="mt-4 w-full px-2">
-              <Slider
-                value={[randomizeAmount]}
-                min={0}
-                max={100}
-                step={1}
-                onValueChange={(value) => setRandomizeAmount(value[0])}
-                className="w-full"
-              />
-            </div>
-          </div>
-        </div>
+        <ParameterControls 
+          velocity={velocity}
+          setVelocity={setVelocity}
+          timing={timing}
+          setTiming={setTiming}
+          randomizeAmount={randomizeAmount}
+          setRandomizeAmount={setRandomizeAmount}
+        />
         
         {/* Footer Controls */}
-        <div className="mt-8 flex justify-between items-center border-t border-gray-700/50 pt-4">
-          <div className="flex items-center gap-3">
-            <button 
-              className="plugin-button flex items-center gap-2"
-              onClick={() => {
-                setVelocity(20);
-                setTiming(15);
-                setRandomizeAmount(50);
-              }}
-            >
-              <RefreshCw size={16} />
-              Reset
-            </button>
-            
-            <button className="plugin-button flex items-center gap-2">
-              <Save size={16} />
-              Save
-            </button>
-          </div>
-          
-          <div className="plugin-display">
-            <span className="opacity-70">Status:</span> Ready
-          </div>
-        </div>
+        <PluginFooter onReset={handleReset} />
       </div>
     </div>
   );
