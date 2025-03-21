@@ -13,6 +13,9 @@
 
 #define MIDI_RANDOMIZER_URI "http://example.org/midi-randomizer"
 
+// Define CLAMP macro to ensure values stay within a specified range
+#define CLAMP(x, min, max) ((x) < (min) ? (min) : ((x) > (max) ? (max) : (x)))
+
 typedef enum {
     MIDI_IN  = 0,
     MIDI_OUT = 1,
@@ -140,7 +143,10 @@ run(LV2_Handle instance, uint32_t sample_count)
     // Set up forge to write to output port
     const uint32_t out_capacity = out->atom.size;
     lv2_atom_forge_set_buffer(&self->forge, (uint8_t*)out, out_capacity);
-    lv2_atom_forge_sequence_head(&self->forge, &out->body, 0);
+    
+    // Fix: Create a frame for the sequence
+    LV2_Atom_Forge_Frame frame;
+    lv2_atom_forge_sequence_head(&self->forge, &frame, 0);
     
     // Read incoming events
     LV2_ATOM_SEQUENCE_FOREACH(in, ev) {
@@ -183,6 +189,9 @@ run(LV2_Handle instance, uint32_t sample_count)
             }
         }
     }
+    
+    // Close the sequence frame
+    lv2_atom_forge_pop(&self->forge, &frame);
 }
 
 static const LV2_Descriptor descriptor = {
